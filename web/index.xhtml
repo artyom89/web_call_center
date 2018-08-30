@@ -2,20 +2,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
-<head>
+<h:head>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <title>Logo Nav - Start Bootstrap Template</title>
+    <title>Almundo test/web-call-center</title>
     <!-- Bootstrap core CSS -->
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
     <!-- Custom styles for this template -->
     <link href="css/logo-nav.css" rel="stylesheet"/>
     <!-- Bootstrap core JavaScript -->
 
-</head>
+</h:head>
 
-<body>
+<h:body>
 
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -42,17 +43,42 @@
 
 
 
-<div class="container">
+<div class="container" align="center">
 
 
     <h:form>
 
-        <p:chart type="pie" model="#{chartView.pieModel1}" style="width:400px;height:300px" />
+        <p:outputLabel value="The availability of employees is analyzed as they execute a series of random calls." style="margin-top:20px"/>
+
+        <p:poll interval="1" update="dataListAvailable, dataListBusy" autoStart="true"/>
+
 
         <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
 
+        <p:dataList value="#{dispacher.availableEmployeeList}" var="enableEmployee" id="dataListAvailable">
+            <f:facet name="header">
+                Available employees
+            </f:facet>
+            #{enableEmployee.name_employee}
+        </p:dataList>
 
-            <p:commandButton value="Submit" icon="ui-icon-check" action="#{dispacher.startGeneratingCalls}"/>
+            <p:dataList value="#{dispacher.busyEmployeeList}" var="busyEmployee" id="dataListBusy">
+                <f:facet name="header">
+                    Busy employees
+                </f:facet>
+                #{busyEmployee.name_employee}
+            </p:dataList>
+
+        </h:panelGrid>
+
+
+        <h:panelGrid columns="4" style="margin-bottom:10px" cellpadding="5">
+
+
+            <p:commandButton value="Generate" icon="ui-icon-check" action="#{dispacher.startGeneratingCalls}" id="start"/>
+            <p:spacer />
+
+            <p:commandButton value="Stop" icon="ui-icon-check" action="#{dispacher.stopGeneratingCalls}" id="stop"/>
             <p:spacer />
 
         </h:panelGrid>
@@ -60,9 +86,12 @@
 
 
 </div>
-<!-- /.container -->
 
 
+<!-- Bootstrap core JavaScript -->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-</body>
+
+</h:body>
 </html>

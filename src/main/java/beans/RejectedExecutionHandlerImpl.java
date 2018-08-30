@@ -13,7 +13,7 @@ public class RejectedExecutionHandlerImpl implements RejectedExecutionHandler {
         //LOG
        try {
            System.out.println(r.toString() + " is rejected");
-           executor.getQueue().add(r);
+          // executor.getQueue().add(r);
        }
        catch (Exception e )
        {

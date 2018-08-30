@@ -7,28 +7,35 @@ import javax.faces.bean.ManagedBean;
 import java.io.Serializable;
 
 @ManagedBean
+
 public class ChartView implements Serializable {
 
+
     private PieChartModel livePieModel;
+
+    @PostConstruct
+    public void init() {
+        livePieModel = new PieChartModel();
+    }
 
     public PieChartModel getLivePieModel() {
 
 
-        Dispacher.availableSyncEmployeeList.stream().forEach((p)->{
-            livePieModel.getData().put(p.getName_employee(),1);} );
+       /* Dispacher.availableSyncEmployeeList.stream().forEach((p)->{
+            livePieModel.getData().put(p.getName_employee(),1);} );*/
 
         int random1 = (int)(Math.random() * 1000);
         int random2 = (int)(Math.random() * 1000);
 
-        //livePieModel.getData().put("Candidate 1", random1);
-        //livePieModel.getData().put("Candidate 2", random2);
+        livePieModel.getData().put("Candidate 1", random1);
+        livePieModel.getData().put("Candidate 2", random2);
 
         livePieModel.setTitle("Votes");
         livePieModel.setLegendPosition("ne");
 
         return livePieModel;
     }
-
+/*
     private PieChartModel pieModel1;
     private PieChartModel pieModel2;
 
@@ -77,6 +84,5 @@ public class ChartView implements Serializable {
         pieModel2.setShowDataLabels(true);
         pieModel2.setDiameter(150);
         pieModel2.setShadow(false);
-    }
-
+    }*/
 }

@@ -2,8 +2,10 @@ package beans;
 
 import model.Employee;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,19 +13,41 @@ import java.util.Optional;
 import java.util.concurrent.*;
 
 @ManagedBean
-@SessionScoped
-public class Dispacher {
+@ViewScoped
+public class Dispacher implements Serializable {
 
     RejectedExecutionHandlerImpl rejectionHandler;
     //Get the ThreadFactory implementation to use
     ThreadFactory threadFactory;
     ThreadPoolExecutor executorPool;
 
+    public String xy = "PRUEBA HILDA INSOPORTABLE";
+
+    public String getXy() {
+        return xy;
+    }
 
     //private static List<Employee> availableEmployeeList;
     public static List<Employee> busySyncEmployeeList;
-
+    public List<Employee> busyEmployeeList;
     public static List<Employee> availableSyncEmployeeList;
+    public List<Employee> availableEmployeeList;
+
+    public static List<Employee> getBusySyncEmployeeList() {
+        return busySyncEmployeeList;
+    }
+
+    public static List<Employee> getAvailableSyncEmployeeList() {
+        return availableSyncEmployeeList;
+    }
+
+    public List<Employee> getAvailableEmployeeList() {
+        return availableEmployeeList;
+    }
+
+    public List<Employee> getBusyEmployeeList() {
+        return busyEmployeeList;
+    }
 
     //private static long cantOperators = 0;
     // private static long cantSupervisors = 0;
@@ -35,15 +59,43 @@ public class Dispacher {
 
     public void startGeneratingCalls() {
 
-        for (int i = 0; i < 15; i++) {
+        try {
+            callThreadArrayList.clear();
+            ThreadLocalRandom time_generator = ThreadLocalRandom.current();
+            int cantCalls =   time_generator.nextInt(5, 20) ;
 
-            //Runnable newCall = new CallThread( findAvailableEmployee());
-            Runnable newCall = new CallThread();
-            callThreadArrayList.add(newCall);
+            System.out.println("This many calls:------------------ " +cantCalls);
+            for (int i = 0; i < cantCalls; i++) {
+
+                //Runnable newCall = new CallThread( findAvailableEmployee());
+                Runnable newCall = new CallThread();
+                callThreadArrayList.add(newCall);
+            }
+
+            MyMonitorThread monitor = new MyMonitorThread(executorPool, 5);
+            Thread monitorThread = new Thread(monitor);
+            monitorThread.start();
+
+            dispatchCall(callThreadArrayList);
+
+           // Thread.sleep(30000);
+            //shut down the pool
+            //executorPool.shutdown();
+            //shut down the monitor thread
+            //Thread.sleep(5000);
+            //monitor.shutdown();
         }
-        dispatchCall(callThreadArrayList);
+
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+
     }
 
+    public void stopGeneratingCalls(){
+        executorPool.shutdown();
+    }
 
     public synchronized static Employee findAvailableEmployee() {
         //Employee selectedEmployee;
@@ -85,7 +137,7 @@ public class Dispacher {
             synchronized (busySyncEmployeeList) {
                 availableSyncEmployeeList.add(employee);
                 busySyncEmployeeList.remove(employee);
-                availableSyncEmployeeList.get(availableSyncEmployeeList.indexOf(employee)).setAvailable(true);
+                //availableSyncEmployeeList.get(availableSyncEmployeeList.indexOf(employee)).setAvailable(true);
             }
 
         } catch (Exception e) {
@@ -93,40 +145,37 @@ public class Dispacher {
         }
     }
 
-
+/*
     public Dispacher() {
         rejectionHandler = new RejectedExecutionHandlerImpl();
         threadFactory = Executors.defaultThreadFactory();
         executorPool = new ThreadPoolExecutor(10, 10, 20, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), threadFactory, rejectionHandler);
 
-        availableSyncEmployeeList = Collections.synchronizedList(new ArrayList<Employee>());
-        busySyncEmployeeList = Collections.synchronizedList(new ArrayList<Employee>());
+        availableSyncEmployeeList = Collections.synchronizedList(new ArrayList<>());
+        busySyncEmployeeList = Collections.synchronizedList(new ArrayList<>());
 
         seedEmployees();
-        //countEmployees ();
-        //dispacher = new Dispacher();
         callThreadArrayList = new ArrayList<>();
-        startGeneratingCalls();
+        //startGeneratingCalls();
 
     }
-    /*
+    */
     @PostConstruct
     void init() {
 
         rejectionHandler = new RejectedExecutionHandlerImpl();
         threadFactory = Executors.defaultThreadFactory();
-        executorPool = new ThreadPoolExecutor(10, 10, 20, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), threadFactory, rejectionHandler);
-
-        availableSyncEmployeeList = Collections.synchronizedList(new ArrayList<Employee>());
-        busySyncEmployeeList = Collections.synchronizedList(new ArrayList<Employee>());
-
-        seedEmployees();
-        //countEmployees ();
-        //dispacher = new Dispacher();
+        executorPool = new ThreadPoolExecutor(10, 10, 15, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), threadFactory, rejectionHandler);
         callThreadArrayList = new ArrayList<>();
-        startGeneratingCalls();
+        availableSyncEmployeeList = Collections.synchronizedList(new ArrayList<>());
+        busySyncEmployeeList = Collections.synchronizedList(new ArrayList<>());
+        availableEmployeeList = availableSyncEmployeeList;
+        busyEmployeeList = busySyncEmployeeList;
+        seedEmployees();
 
-    }*/
+        //startGeneratingCalls();
+    }
+
 
 
     //creating the ThreadPoolExecutor
@@ -134,6 +183,7 @@ public class Dispacher {
         try {
             for (Runnable incomingCall : incomingCalls) {
                 executorPool.execute(incomingCall);
+
             }
         } catch (Exception e) {
             e.getMessage();
