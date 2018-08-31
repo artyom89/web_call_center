@@ -17,6 +17,7 @@ public class DispatcherTest {
 
           while(dispatcher.getExecutorPool().getActiveCount()!=0){
                 ///WAIT TO ALL THREADS TO FINISH TO CONTINUE
+              dispatcher.getExecutorPool().shutdown();
           }
           //dispatcher.stopGeneratingCalls();
 
@@ -34,7 +35,7 @@ public class DispatcherTest {
     //By default the pool can handle only 10 calls at the same time, but have a work queue who can handle some excess. I add another 10 calls, so it can
     //handle 20 calls before start rejecting other calls
     @Test
-    public void dispatchMoreCallsThatPoolCanHandle() throws Exception {
+    public void dispatchMoreCallsThatPoolCanHandle()  {
 
         try {
             Dispatcher dispatcher = new Dispatcher();
