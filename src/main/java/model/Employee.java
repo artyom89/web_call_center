@@ -2,6 +2,9 @@ package model;
 
 import java.util.UUID;
 
+/**
+ * Model class employee
+ */
 public class Employee {
     
     private UUID id_employee;

@@ -8,6 +8,11 @@ public class MyMonitorThread implements Runnable
     private int seconds;
     private boolean run=true;
 
+    /**
+     * MonitorThread to log given delay parameter
+     * @param executor
+     * @param delay
+     */
     public MyMonitorThread(ThreadPoolExecutor executor, int delay)
     {
         this.executor = executor;
