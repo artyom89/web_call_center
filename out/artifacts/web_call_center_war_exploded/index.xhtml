@@ -2,7 +2,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
@@ -56,14 +55,14 @@
 
         <h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
 
-        <p:dataList value="#{dispacher.availableEmployeeList}" var="enableEmployee" id="dataListAvailable">
+        <p:dataList value="#{dispatcher.availableEmployeeList}" var="enableEmployee" id="dataListAvailable">
             <f:facet name="header">
                 Available employees
             </f:facet>
             #{enableEmployee.name_employee}
         </p:dataList>
 
-            <p:dataList value="#{dispacher.busyEmployeeList}" var="busyEmployee" id="dataListBusy">
+            <p:dataList value="#{dispatcher.busyEmployeeList}" var="busyEmployee" id="dataListBusy">
                 <f:facet name="header">
                     Busy employees
                 </f:facet>
@@ -76,10 +75,10 @@
         <h:panelGrid columns="4" style="margin-bottom:10px" cellpadding="5">
 
 
-            <p:commandButton value="Generate" icon="ui-icon-check" action="#{dispacher.startGeneratingCalls}" id="start"/>
+            <p:commandButton value="Generate" icon="ui-icon-check" action="#{dispatcher.startGeneratingCalls}" id="start"/>
             <p:spacer />
 
-            <p:commandButton value="Stop" icon="ui-icon-check" action="#{dispacher.stopGeneratingCalls}" id="stop"/>
+            <p:commandButton value="Stop" icon="ui-icon-check" action="#{dispatcher.stopGeneratingCalls}" id="stop"/>
             <p:spacer />
 
         </h:panelGrid>

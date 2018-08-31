@@ -2,7 +2,6 @@ package beans;
 
 import model.Employee;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import java.io.Serializable;
@@ -12,35 +11,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 
+/**
+ * This is the main class
+ */
 @ManagedBean
 @ViewScoped
-public class Dispacher implements Serializable {
+public class Dispatcher implements Serializable {
 
     RejectedExecutionHandlerImpl rejectionHandler;
     //Get the ThreadFactory implementation to use
     ThreadFactory threadFactory;
     ThreadPoolExecutor executorPool;
+    MyMonitorThread monitor;
 
-    public String xy = "PRUEBA HILDA INSOPORTABLE";
-
-    public String getXy() {
-        return xy;
-    }
-
-    //private static List<Employee> availableEmployeeList;
     public static List<Employee> busySyncEmployeeList;
     public List<Employee> busyEmployeeList;
     public static List<Employee> availableSyncEmployeeList;
     public List<Employee> availableEmployeeList;
 
-    public static List<Employee> getBusySyncEmployeeList() {
-        return busySyncEmployeeList;
-    }
-
-    public static List<Employee> getAvailableSyncEmployeeList() {
-        return availableSyncEmployeeList;
-    }
-
+    //this type of integer allows the used by many threads concurrently
+    public static int countCantCall = 0;
+    public static int countCantCallRejected = 0;
     public List<Employee> getAvailableEmployeeList() {
         return availableEmployeeList;
     }
@@ -49,42 +40,58 @@ public class Dispacher implements Serializable {
         return busyEmployeeList;
     }
 
-    //private static long cantOperators = 0;
-    // private static long cantSupervisors = 0;
-    //private static long cantDirectors = 0;
-
-    private Dispacher dispacher;
     private ArrayList<Runnable> callThreadArrayList;
 
+    public ThreadPoolExecutor getExecutorPool() {
+        return executorPool;
+    }
 
     public void startGeneratingCalls() {
 
         try {
             callThreadArrayList.clear();
+            //countCantCallRejected=0;
+            //countCantCall=0;
             ThreadLocalRandom time_generator = ThreadLocalRandom.current();
             int cantCalls =   time_generator.nextInt(5, 20) ;
 
             System.out.println("This many calls:------------------ " +cantCalls);
             for (int i = 0; i < cantCalls; i++) {
 
-                //Runnable newCall = new CallThread( findAvailableEmployee());
-                Runnable newCall = new CallThread();
+                Runnable newCall = new CallThread( findAvailableEmployee());
+                //Runnable newCall = new CallThread();
                 callThreadArrayList.add(newCall);
             }
 
-            MyMonitorThread monitor = new MyMonitorThread(executorPool, 5);
+            monitor = new MyMonitorThread(executorPool, 5);
             Thread monitorThread = new Thread(monitor);
             monitorThread.start();
 
             dispatchCall(callThreadArrayList);
 
-           // Thread.sleep(30000);
-            //shut down the pool
-            //executorPool.shutdown();
-            //shut down the monitor thread
-            //Thread.sleep(5000);
-            //monitor.shutdown();
         }
+
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+
+    }
+//
+    public void startGeneratingCallsP(int cantOfCalls) {
+
+        try {
+            callThreadArrayList.clear();
+           for (int i = 0; i < cantOfCalls; i++) {
+
+                Runnable newCall = new CallThread( findAvailableEmployee());
+               // Runnable newCall = new CallThread();
+                callThreadArrayList.add(newCall);
+            }
+
+            dispatchCall(callThreadArrayList);
+
+            }
 
         catch (Exception e)
         {
@@ -95,9 +102,14 @@ public class Dispacher implements Serializable {
 
     public void stopGeneratingCalls(){
         executorPool.shutdown();
+        monitor.shutdown();
+
     }
 
+
     public synchronized static Employee findAvailableEmployee() {
+
+       try {
         //Employee selectedEmployee;
         Optional<Employee> selectedEmployeeOptional;
         synchronized (availableSyncEmployeeList) {
@@ -127,6 +139,9 @@ public class Dispacher implements Serializable {
 
             }
 
+        }}
+        catch (Exception e) {
+       System.out.println(e.getMessage());
         }
         return null;
     }
@@ -137,7 +152,7 @@ public class Dispacher implements Serializable {
             synchronized (busySyncEmployeeList) {
                 availableSyncEmployeeList.add(employee);
                 busySyncEmployeeList.remove(employee);
-                //availableSyncEmployeeList.get(availableSyncEmployeeList.indexOf(employee)).setAvailable(true);
+
             }
 
         } catch (Exception e) {
@@ -145,21 +160,24 @@ public class Dispacher implements Serializable {
         }
     }
 
-/*
-    public Dispacher() {
+
+    public Dispatcher() {
         rejectionHandler = new RejectedExecutionHandlerImpl();
         threadFactory = Executors.defaultThreadFactory();
-        executorPool = new ThreadPoolExecutor(10, 10, 20, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), threadFactory, rejectionHandler);
-
+        executorPool = new ThreadPoolExecutor(10, 10, 15, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10), threadFactory, rejectionHandler);
+        callThreadArrayList = new ArrayList<>();
         availableSyncEmployeeList = Collections.synchronizedList(new ArrayList<>());
         busySyncEmployeeList = Collections.synchronizedList(new ArrayList<>());
 
         seedEmployees();
-        callThreadArrayList = new ArrayList<>();
-        //startGeneratingCalls();
+
+        availableEmployeeList = availableSyncEmployeeList;
+        busyEmployeeList = busySyncEmployeeList;
 
     }
-    */
+
+
+/*
     @PostConstruct
     void init() {
 
@@ -176,7 +194,7 @@ public class Dispacher implements Serializable {
         //startGeneratingCalls();
     }
 
-
+*/
 
     //creating the ThreadPoolExecutor
     public void dispatchCall(ArrayList<Runnable> incomingCalls) {
